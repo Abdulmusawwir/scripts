@@ -1,0 +1,40 @@
+# Function to clean a specific folder
+function Clean-Folder($folderPath) {
+    if (Test-Path -Path $folderPath) {
+        Write-Host "Cleaning up $folderPath"
+        Get-ChildItem -Path $folderPath -Recurse -Force | Remove-Item -Force -Recurse -ErrorAction SilentlyContinue
+    }
+}
+
+# Clean up system log and temp folders
+$systemFolders = @(
+    "$Env:SystemRoot\Temp",
+    "$Env:SystemRoot\Logs",
+    "$Env:LOCALAPPDATA\Temp",
+    "$Env:WINDIR\SoftwareDistribution\Download",
+    "$Env:WINDIR\System32\LogFiles",
+    "$Env:WINDIR\System32\Winevt\Logs",
+    "$Env:PUBLIC\Documents\Windows Error Reporting",
+    "C:\Windows\Temp",  # Additional system temp folder
+    "C:\Windows\Logs"   # Additional system log folder
+)
+
+foreach ($folderPath in $systemFolders) {
+    Clean-Folder $folderPath
+}
+
+# Clean up user temp and internet cache folders
+$users = Get-ChildItem -Path "C:\Users\" -Directory -Force -ErrorAction SilentlyContinue
+
+foreach ($user in $users) {
+    $userTempFolder = Join-Path $user.FullName "AppData\Local\Temp"
+    $userCacheFolder = Join-Path $user.FullName "AppData\Local\Microsoft\Windows\INetCache"
+    $userIECacheFolder = Join-Path $user.FullName "AppData\Local\Microsoft\Windows\INetCookies"
+
+    Clean-Folder $userTempFolder
+    Clean-Folder $userCacheFolder
+    Clean-Folder $userIECacheFolder
+
+}
+
+Write-Host "Cleanup complete!"
