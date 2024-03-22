@@ -1,0 +1,14 @@
+# Stop the Windows Update service
+Stop-Service -Name wuauserv
+
+# Change to C: drive
+Set-Location -Path "C:"
+
+# Navigate to the SoftwareDistribution folder
+Set-Location -Path "$env:Windir\SoftwareDistribution"
+
+# Remove all files in the Download directory forcefully and silently
+Remove-Item -Path "Download" -Recurse -Force -ErrorAction SilentlyContinue
+
+# Start the Windows Update service
+Start-Service -Name wuauserv
